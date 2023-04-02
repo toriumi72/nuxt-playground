@@ -1,4 +1,4 @@
-import {https,} from "firebase-functions";
+import {https} from "firebase-functions";
 import {defineString} from "firebase-functions/params";
 import {WebhookRequestBody, Client} from "@line/bot-sdk";
 
