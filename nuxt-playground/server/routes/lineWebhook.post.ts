@@ -156,45 +156,188 @@
 //   });
 // });
 
-import { WebhookRequestBody, Client } from "@line/bot-sdk"
+// import { WebhookRequestBody, Client } from "@line/bot-sdk" 
+// import { Configuration, OpenAIApi } from 'openai'
 
-export default defineEventHandler((event:any) => {
+// export default defineEventHandler((event:any) => {
 
-  event.node.res.sendStatus(200)
+//   event.node.res.sendStatus(200)
 
-  const { channelSecret, channelAccessToken } = useRuntimeConfig().private
+//   const { channelSecret, channelAccessToken } = useRuntimeConfig().private
+
+//   const lineClient = new Client({
+//     channelSecret: channelSecret,
+//     channelAccessToken: channelAccessToken,
+//   })
+
+//   const { events } = event.node.req.body as WebhookRequestBody
+
+//   events.forEach((event) => {
+
+//     if (event.type === 'message') {
+
+//       const { replyToken, message } = event
+
+//       if (message.type === 'text') {
+
+//         switch (message.text) {
+//         case "入室しました": {
+//           lineClient.replyMessage(replyToken, {type: "text", text: "入室時の金額を入力"})
+//           break
+//         }
+//         case "退出しました": {
+//           lineClient.replyMessage(replyToken, {type: "text", text: "お疲れ様でした"})
+//           break
+//         }
+//         default:
+//           break
+//         }
+//       }
+//     }
+//   })
+
+//   event.node.res.end()
+
+// })
+
+// import { WebhookRequestBody, Client } from '@line/bot-sdk';
+// import { Configuration, OpenAIApi } from 'openai';
+
+// const { channelSecret, channelAccessToken } = useRuntimeConfig().private;
+// const { openaiApiKey } = useRuntimeConfig().public;
+
+
+// const openaiConfig = new Configuration({
+//   apiKey: openaiApiKey,
+// });
+
+// async function generateResponse(prompt: string) {
+//   const openaiInstance = new OpenAIApi(openaiConfig);
+
+//   const response = await openaiInstance.createCompletion({
+//     model: 'text-davinci-002',
+//     prompt: prompt,
+//     // max_tokens: 150,
+//     temperature: 0.7,
+//   });
+
+//   return response.data.choices[0].text || '';
+//   // return response.data.choices[0].text.trim()
+// }
+
+// export default defineEventHandler((event: any) => {
+//   event.node.res.sendStatus(200);
+
+//   const lineClient = new Client({
+//     channelSecret: channelSecret,
+//     channelAccessToken: channelAccessToken,
+//   });
+
+//   const { events } = event.node.req.body as WebhookRequestBody;
+//   // console.log(events.source.userId);
+//   events.forEach(async (event) => {
+//     if (event.type === 'message') {
+//       const { replyToken, message } = event;
+
+//       if (message.type === 'text') {
+//         let replyText;
+
+//         switch (message.text) {
+//           case '入室しました': {
+//             replyText = '入室時の金額を入力';
+//             break;
+//           }
+//           case '退出しました': {
+//             replyText = 'お疲れ様でした';
+//             break;
+//           }
+//           default: {
+//             // OpenAI API を使用して応答を生成
+//             // replyText = '何で？'
+//             const prompt =  `
+//             ${message.text}
+//             お友達みたいに話してください。
+//             `.trim()
+//             replyText = await generateResponse(prompt);
+//             break;
+//           }
+//         }
+
+//         lineClient.replyMessage(replyToken, { type: 'text', text: replyText });
+//       }
+//     }
+//   });
+
+//   event.node.res.end();
+// });
+
+import { WebhookRequestBody, Client } from '@line/bot-sdk';
+import { Configuration, OpenAIApi } from 'openai';
+
+const { channelSecret, channelAccessToken } = useRuntimeConfig().private;
+const { openaiApiKey } = useRuntimeConfig().public;
+
+const openaiConfig = new Configuration({
+  apiKey: openaiApiKey,
+});
+
+async function generateResponse(prompt: any) {
+  const openaiInstance = new OpenAIApi(openaiConfig);
+
+  const response = await openaiInstance.createCompletion({
+    model: 'text-davinci-002',
+    prompt: prompt,
+    // max_tokens: 150,
+    temperature: 0.7,
+  });
+
+  return response.data.choices[0].text || '';
+}
+
+export default defineEventHandler(async (event: any) => {
+  event.node.res.sendStatus(200);
 
   const lineClient = new Client({
     channelSecret: channelSecret,
     channelAccessToken: channelAccessToken,
-  })
+  });
 
-  const { events } = event.node.req.body as WebhookRequestBody
+  const { events } = event.node.req.body as WebhookRequestBody;
 
-  events.forEach((event) => {
-
+  for (const event of events) {
     if (event.type === 'message') {
-
-      const { replyToken, message } = event
+      const { replyToken, message } = event;
 
       if (message.type === 'text') {
+        let replyText;
 
         switch (message.text) {
-        case "入室しました": {
-          lineClient.replyMessage(replyToken, {type: "text", text: "入室時の金額を入力"})
-          break
+          case '入室しました': {
+            replyText = '入室時の金額を入力';
+            break;
+          }
+          case '退出しました': {
+            replyText = 'お疲れ様でした';
+            break;
+          }
+          default: {
+            const prompt = `
+              ${message.text}
+              お友達みたいに話してください。
+            `.trim();
+            replyText = await generateResponse(prompt);
+            break;
+          }
         }
-        case "退出しました": {
-          lineClient.replyMessage(replyToken, {type: "text", text: "お疲れ様でした"})
-          break
-        }
-        default:
-          break
-        }
+
+        await lineClient.replyMessage(replyToken, { type: 'text', text: replyText });
       }
     }
-  })
+  }
 
-  event.node.res.end()
+  event.node.res.end();
+});
 
-})
+
+
+
