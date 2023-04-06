@@ -110,46 +110,91 @@
 //   }
 // })
 
-import { WebhookRequestBody, Client } from "@line/bot-sdk";
+// import { WebhookRequestBody, Client } from "@line/bot-sdk";
 
-// 実行時に必要なパラメータを環境変数から取得
-const config = useRuntimeConfig();
-const channel = {
-  channelSecret: config.public.channelSecret,
-  channelAccessToken: config.public.channelAccessToken,
-};
+// // 実行時に必要なパラメータを環境変数から取得
+// const config = useRuntimeConfig();
+// const channel = {
+//   channelSecret: config.public.channelSecret,
+//   channelAccessToken: config.public.channelAccessToken,
+// };
 
-export default defineEventHandler(async (event) => {
-  if (event.node.req.method !== "POST") {
-    event.res.writeHead(405, { "Content-Type": "application/json" });
-    event.res.end(JSON.stringify({ message: "Only POST method is allowed" }));
-    return;
-  }
 
-  event.res.writeHead(200, { "Content-Type": "application/json" });
-  event.res.end(JSON.stringify({ message: "HTTP POST request sent to the webhook URL!" }));
+// export default defineEventHandler(async (event) => {
+//   // const { test } = useAuth()
+//   if (event.node.req.method !== "POST") {
+//     event.res.writeHead(405, { "Content-Type": "application/json" });
+//     // event.res.end(JSON.stringify({ message: "Only POST method is allowed" }));
+//     return;
+//   }
+//   // test.value = "test"
+//   event.res.writeHead(200, { "Content-Type": "application/json" });
+//   // event.res.end(JSON.stringify({ message: "HTTP POST request sent to the webhook URL!" }));
 
-  // LINE Messaging API Clientの初期化
+//   // LINE Messaging API Clientの初期化
+//   const lineClient = new Client({
+//     channelSecret: channel.channelSecret,
+//     channelAccessToken: channel.channelAccessToken,
+//   });
+
+//   // ユーザーがbotに送ったメッセージをそのまま返す
+//   const body = JSON.parse(await readBody(event));
+//   const events = (body as WebhookRequestBody).events;
+//   events.forEach((event) => {
+//     switch (event.type) {
+//       case "message": {
+//         const { replyToken, message } = event;
+//         if (message.type === "text") {
+//           lineClient.replyMessage(replyToken, { type: "text", text: message.text });
+//         }
+
+//         break;
+//       }
+//       default:
+//         break;
+//     }
+//   });
+// });
+
+import { WebhookRequestBody, Client } from "@line/bot-sdk"
+
+export default defineEventHandler((event:any) => {
+
+  event.node.res.sendStatus(200)
+
+  const { channelSecret, channelAccessToken } = useRuntimeConfig().private
+
   const lineClient = new Client({
-    channelSecret: channel.channelSecret,
-    channelAccessToken: channel.channelAccessToken,
-  });
+    channelSecret: channelSecret,
+    channelAccessToken: channelAccessToken,
+  })
 
-  // ユーザーがbotに送ったメッセージをそのまま返す
-  const body = JSON.parse(await readBody(event));
-  const events = (body as WebhookRequestBody).events;
+  const { events } = event.node.req.body as WebhookRequestBody
+
   events.forEach((event) => {
-    switch (event.type) {
-      case "message": {
-        const { replyToken, message } = event;
-        if (message.type === "text") {
-          lineClient.replyMessage(replyToken, { type: "text", text: message.text });
-        }
 
-        break;
+    if (event.type === 'message') {
+
+      const { replyToken, message } = event
+
+      if (message.type === 'text') {
+
+        switch (message.text) {
+        case "入室しました": {
+          lineClient.replyMessage(replyToken, {type: "text", text: "入室時の金額を入力"})
+          break
+        }
+        case "退出しました": {
+          lineClient.replyMessage(replyToken, {type: "text", text: "お疲れ様でした"})
+          break
+        }
+        default:
+          break
+        }
       }
-      default:
-        break;
     }
-  });
-});
+  })
+
+  event.node.res.end()
+
+})

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// const { test } = useAuth()
 const generateKey = async () => {
   const pair = await crypto.subtle.generateKey(
     {
@@ -32,5 +33,8 @@ const generateKey = async () => {
     <button @click="generateKey">
       push
     </button>
+  </div>
+  <div>
+    <!-- useState:{{ test }} -->
   </div>
 </template>
