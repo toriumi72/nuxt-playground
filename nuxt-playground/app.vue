@@ -34,7 +34,23 @@ const generateKey = async () => {
       push
     </button>
   </div>
-  <div>
-    <!-- useState:{{ test }} -->
-  </div>
+  
+
 </template>
+
+<!-- <script setup lang="ts">
+const name = ref('')
+const result = ref('')
+const animal = computed(() => name.value[0].toUpperCase() + name.value.slice(1).toLowerCase())
+const submit = async () => {
+  result.value = ''
+  const method = 'POST'
+  const body = { animal: animal.value }
+  const { data } = await useFetch('/api/generate', {
+    method,
+    body,
+  })
+  result.value = data.value?.result || 'Sorry, Error has occurred'
+}
+</script> -->
+

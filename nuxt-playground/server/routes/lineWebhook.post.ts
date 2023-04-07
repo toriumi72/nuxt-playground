@@ -271,39 +271,142 @@
 //   event.node.res.end();
 // });
 
+// import { WebhookRequestBody, Client } from '@line/bot-sdk';
+
+// const { channelSecret, channelAccessToken } = useRuntimeConfig().private;
+// const { openaiApiKey } = useRuntimeConfig().public;
+
+// export default defineEventHandler(async (event: any) => {
+//   event.node.res.sendStatus(200);
+
+//   const lineClient = new Client({
+//     channelSecret: channelSecret,
+//     channelAccessToken: channelAccessToken,
+//   });
+
+//   const { events } = event.node.req.body as WebhookRequestBody;
+//   console.log(events);
+//   for (const event of events) {
+//     if (event.type === 'message') {
+//       const { replyToken, message } = event;
+
+//       if (message.type === 'text') {
+//         let replyText;
+
+//         switch (message.text) {
+//           case '入室しました': {
+//             replyText = '入室時の金額を入力'
+//             break;
+//           }
+//           case '退出しました': {
+//             replyText = 'お疲れ様でした'
+//             break
+//           }
+//           default: {
+//             const prompt = `
+//               ${message.text}
+//               お友達みたいに話してください。
+//             `.trim()
+//             const response = await fetch('/api/generate', {
+//               method: 'POST',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${openaiApiKey}`,
+//               },
+//               body: JSON.stringify({ prompt: prompt }),
+//             });
+//             const responseData = await response.json()
+//             replyText = responseData.result
+//             break
+//           }
+//         }
+
+//         await lineClient.replyMessage(replyToken, { type: 'text', text: replyText });
+//       }
+//     }
+//   }
+
+//   event.node.res.end();
+// });
+
+// import { WebhookRequestBody, Client } from '@line/bot-sdk';
+
+// const { channelSecret, channelAccessToken } = useRuntimeConfig().private;
+// const { openaiApiKey } = useRuntimeConfig().public;
+
+// export default defineEventHandler(async (event: any) => {
+//   event.node.res.sendStatus(200);
+
+//   const lineClient = new Client({
+//     channelSecret: channelSecret,
+//     channelAccessToken: channelAccessToken,
+//   });
+
+//   const { events } = event.node.req.body as WebhookRequestBody;
+//   console.log(events);
+//   for (const event of events) {
+//     if (event.type === 'message') {
+//       const { replyToken, message } = event;
+
+//       if (message.type === 'text') {
+//         let replyText;
+
+//         switch (message.text) {
+//           case '入室しました': {
+//             replyText = '入室時の金額を入力';
+//             break;
+//           }
+//           case '退出しました': {
+//             replyText = 'お疲れ様でした';
+//             break;
+//           }
+//           default: {
+//             const prompt = `
+//               ${message.text}
+//               お友達みたいに話してください。
+//             `.trim();
+//             const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+//               method: 'POST',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${openaiApiKey}`,
+//               },
+//               body: JSON.stringify({
+//                 prompt: prompt,
+//                 max_tokens: 100,
+//                 n: 1,
+//                 stop: null,
+//                 temperature: 0.8,
+//               }),
+//             });
+//             const responseData = await response.json();
+//             console.log('responseData:', responseData);
+//             replyText = responseData.choices[0].text.trim();
+//             break;
+//           }
+//         }
+
+//         await lineClient.replyMessage(replyToken, { type: 'text', text: replyText });
+//       }
+//     }
+//   }
+
+//   event.node.res.end();
+// });
+
 import { WebhookRequestBody, Client } from '@line/bot-sdk';
-import { Configuration, OpenAIApi } from 'openai';
 
 const { channelSecret, channelAccessToken } = useRuntimeConfig().private;
 const { openaiApiKey } = useRuntimeConfig().public;
 
-const openaiConfig = new Configuration({
-  apiKey: openaiApiKey,
-});
-
-async function generateResponse(prompt: any) {
-  const openaiInstance = new OpenAIApi(openaiConfig);
-
-  const response = await openaiInstance.createCompletion({
-    model: 'text-davinci-002',
-    prompt: prompt,
-    // max_tokens: 150,
-    temperature: 0.7,
-  });
-
-  return response.data.choices[0].text || '';
-}
-
 export default defineEventHandler(async (event: any) => {
-  event.node.res.sendStatus(200);
-
   const lineClient = new Client({
     channelSecret: channelSecret,
     channelAccessToken: channelAccessToken,
   });
 
   const { events } = event.node.req.body as WebhookRequestBody;
-
+  // console.log(events.message.text);
   for (const event of events) {
     if (event.type === 'message') {
       const { replyToken, message } = event;
@@ -311,33 +414,46 @@ export default defineEventHandler(async (event: any) => {
       if (message.type === 'text') {
         let replyText;
 
-        switch (message.text) {
-          case '入室しました': {
-            replyText = '入室時の金額を入力';
-            break;
-          }
-          case '退出しました': {
-            replyText = 'お疲れ様でした';
-            break;
-          }
-          default: {
+        // switch (message.text) {
+        //   case '入室しました': {
+        //     replyText = '入室時の金額を入力';
+        //     break;
+        //   }
+        //   case '退出しました': {
+        //     replyText = 'お疲れ様でした';
+        //     break;
+        //   }
+          // default: {
+            console.log('default'); // 追加
             const prompt = `
               ${message.text}
               お友達みたいに話してください。
             `.trim();
-            replyText = await generateResponse(prompt);
-            break;
-          }
-        }
+            console.log('default2')
+            const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${openaiApiKey}`,
+              },
+              body: JSON.stringify({
+                prompt: prompt,
+                max_tokens: 100,
+                temperature: 0.8,
+              }),
+            });
+            console.log('default3')
+            const responseData = await response.json();
+            console.log('responseData:', responseData); // 追加
+            replyText = responseData.choices[0].text.trim();
+            // break;
+          // }
+        // }
 
         await lineClient.replyMessage(replyToken, { type: 'text', text: replyText });
       }
     }
   }
 
-  event.node.res.end();
+  event.node.res.end(); // ここに移動
 });
-
-
-
-
