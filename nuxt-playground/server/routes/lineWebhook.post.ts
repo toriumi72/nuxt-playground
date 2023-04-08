@@ -210,6 +210,8 @@ const openaiConfig = new Configuration({
   apiKey: openaiApiKey,
 });
 
+const chatDataByUser = {}
+
 async function generateResponse(prompt: string) {
   const openaiInstance = new OpenAIApi(openaiConfig);
 

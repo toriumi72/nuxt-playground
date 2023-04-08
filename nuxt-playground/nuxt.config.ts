@@ -16,7 +16,7 @@ export default defineNuxtConfig({
       appId: "1:218892116934:web:924471127b61bea8c6c8c7",
       measurementId: "G-2WCRRYNXSH",
       //ここに設定はよくない
-      openaiApiKey: "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"
+      openaiApiKey: process.env.OPENAI_API_KEY,
     },
     private: {
       CHANNEL_ID:"1660812434",
