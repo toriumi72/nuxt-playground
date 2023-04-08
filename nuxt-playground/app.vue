@@ -27,6 +27,24 @@ const generateKey = async () => {
 //   key_id: 'TVV-Ws30oJBfxDp9ZxHjHw'
 // }
 
+const name = ref('')
+const result = ref('')
+const animal = computed(() => name.value[0].toUpperCase() + name.value.slice(1).toLowerCase())
+const submit = async () => {
+  result.value = ''
+  const method = 'POST'
+  const body = { animal: animal.value }
+  const { data } = await useFetch('/api/generate', {
+    // headers:{
+      
+    // },
+    method,
+    body,
+  })
+  result.value = data.value?.result || 'Sorry, Error has occurred'
+}
+
+
 </script>
 <template>
   <div>
@@ -34,7 +52,13 @@ const generateKey = async () => {
       push
     </button>
   </div>
-  
+  <form @submit.prevent="submit">
+    <input v-model="name" placeholder="Enter an animal" />
+    <input type="submit" value="Generate names" />
+  </form>
+  <div>
+    {{ result }}
+  </div>
 
 </template>
 
